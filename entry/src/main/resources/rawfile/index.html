@@ -234,6 +234,9 @@
       var im = new Image();
       im.onload = function () {
         texCache[n.id] = makeCircleTexture(im, typeColors[n.type] || '#ffffff');
+        // 图片到位后,让旧的占位精灵失效,重新生成带真实头像的精灵
+        spriteCache[n.id] = undefined;
+        spriteCache[n.id + '|hi'] = undefined;
         refreshAll();
       };
       im.onerror = function () { };
@@ -243,15 +246,16 @@
   }
 
   var spriteCache = {};
-  function nodeSprite(n) {
-    if (!spriteCache[n.id]) {
+  function nodeSprite(n, big) {
+    var key = n.id + (big ? '|hi' : '');
+    if (!spriteCache[key]) {
       var mat = new THREE.SpriteMaterial({ map: nodeTexture(n), transparent: true });
       var sp = new THREE.Sprite(mat);
-      var s = n.type === 'work' ? 26 : 18;
+      var s = big ? (n.type === 'work' ? 36 : 26) : (n.type === 'work' ? 26 : 18);
       sp.scale.set(s, s, 1);
-      spriteCache[n.id] = sp;
+      spriteCache[key] = sp;
     }
-    return spriteCache[n.id];
+    return spriteCache[key];
   }
 
   // ---- 常显名称标签 ----
@@ -289,7 +293,8 @@
       var dmat = new THREE.MeshPhongMaterial({ color: '#26263a' });
       return new THREE.Mesh(dgeo, dmat);
     }
-    if (n.id === hoverNodeId || n.id === highlightId) return nodeSprite(n);
+    if (n.id === highlightId) return nodeSprite(n, true);
+    if (n.id === hoverNodeId) return nodeSprite(n, false);
     if (showLabels) return labelSprite(n);
     var geo = new THREE.SphereGeometry(n.type === 'work' ? 7 : 5, 24, 24);
     var mat = new THREE.MeshPhongMaterial({ color: typeColors[n.type] || '#888888' });
@@ -367,6 +372,8 @@
         lastLongPress = { id: null, time: 0 };
         return;
       }
+      highlightId = n.id;
+      refreshAll();
       showInfo(n);
     });
 
