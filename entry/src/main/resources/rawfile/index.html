@@ -478,7 +478,7 @@
     var list = document.getElementById('searchResults');
     if (!v) {
       list.style.display = 'none'; list.innerHTML = '';
-      highlightId = null; Graph.nodeColor(); Graph.nodeThreeObject();
+      highlightId = null; refreshAll();
       return;
     }
     var vl = v.toLowerCase();
@@ -509,8 +509,7 @@
           applyFilters();
         }
         highlightId = n.id;
-        Graph.nodeColor();
-        Graph.nodeThreeObject();
+        refreshAll();
         focusNode(n);
         showInfo(n);
       };
@@ -563,8 +562,7 @@
         row.innerHTML = '<span class="rname">' + other.name + '</span>';
         row.onclick = function () {
           highlightId = other.id;
-          Graph.nodeColor();
-          Graph.nodeThreeObject();
+          refreshAll();
           focusNode(other);
           showInfo(other);
         };
