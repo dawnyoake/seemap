@@ -312,9 +312,20 @@
       rels.appendChild(row);
     });
     panel.style.display = 'block';
+    notifyPanel(true);
   }
 
-  function closePanel() { document.getElementById('panel').style.display = 'none'; }
+  function closePanel() {
+    document.getElementById('panel').style.display = 'none';
+    notifyPanel(false);
+  }
+
+  // 通知 ArkTS 侧面板开关状态(用于返回键先关面板)
+  function notifyPanel(open) {
+    try {
+      if (window.seeMapNative && seeMapNative.onPanelChange) seeMapNative.onPanelChange(open);
+    } catch (e) { }
+  }
   document.addEventListener('click', function (e) {
     if (e.target.id === 'graph') closePanel();
   });
