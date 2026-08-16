@@ -436,7 +436,8 @@
     return { nodes: nodes, links: links };
   }
 
-  function applyFilters() {
+  function applyFilters(opts) {
+    opts = opts || {};
     var g = visibleGraph();
     if (highlightId && !g.nodes.some(function (n) { return n.id === highlightId; })) highlightId = null;
     if (longPressNodeId) exitHighlight();
@@ -446,7 +447,7 @@
     s.innerHTML = (workFilter === 'all' ? '' : workFilter + ' · ') +
       '节点 ' + g.nodes.length + ' · 关系 ' + g.links.length +
       ' / 共 ' + fullNodes.length + ' · ' + fullLinks.length;
-    Graph.zoomToFit(600, 60);
+    if (!opts.skipFit) Graph.zoomToFit(600, 60);
   }
 
   // ---- 长按高亮关系 ----
@@ -511,7 +512,7 @@
         highlightId = n.id;
         refreshAll();
         showInfo(n);
-        focusNode(n);
+        jumpTo(n);
       };
       list.appendChild(row);
     });
@@ -563,8 +564,8 @@
         row.onclick = function () {
           highlightId = other.id;
           refreshAll();
-          focusNode(other);
           showInfo(other);
+          jumpTo(other);
         };
         rels.appendChild(row);
       });
@@ -620,15 +621,57 @@
     return fullNodes.find(function (n) { return n.id === id; });
   }
 
-  function focusNode(n) {
-    if (n.x === undefined) return;
-    var d = Math.max(40, Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) * 1.6);
+  // ---- 跳转:目标节点放可视中心,邻居包围盒定距(关系平铺展开) ----
+  function jumpTo(n) {
+    // 目标不在当前可见图里 → 先取消筛选(与搜索行为一致)
+    if (workFilter !== 'all' || !typeFilter[n.type]) {
+      workFilter = 'all';
+      typeFilter = { work: true, character: true, va: true };
+      buildChips();
+      applyFilters({ skipFit: true });
+    }
+    // 等节点有坐标后再聚焦(布局是异步的)
+    var tries = 0;
+    (function tryFocus() {
+      if (n.x !== undefined || tries > 12) {
+        focusEgo(n);
+      } else {
+        tries++;
+        setTimeout(tryFocus, 80);
+      }
+    })();
+  }
+
+  function focusEgo(n) {
+    if (n.x === undefined) { Graph.zoomToFit(600, 60); return; }
+    // 收集目标 + 一度邻居
+    var ids = {}; ids[n.id] = true;
+    fullLinks.forEach(function (l) {
+      var e = linkEnds(l);
+      if (e.s === n.id) ids[e.t] = true;
+      if (e.t === n.id) ids[e.s] = true;
+    });
+    // 包围盒半径
+    var R = 10;
+    var any = false;
+    fullNodes.forEach(function (m) {
+      if (!ids[m.id] || m.x === undefined) return;
+      any = true;
+      var d2 = (m.x - n.x) * (m.x - n.x) + (m.y - n.y) * (m.y - n.y) + (m.z - n.z) * (m.z - n.z);
+      R = Math.max(R, Math.sqrt(d2));
+    });
+    if (!any) { Graph.zoomToFit(600, 60); return; }
     var fov = (Graph.camera && Graph.camera().fov) || 50;
-    // 面板打开时,目标节点放在屏幕上部(避开底部详情页遮挡)
+    // 面板打开时,目标放在可视区中心偏上;否则屏幕正中
     var panelShown = document.getElementById('panel').style.display === 'block';
-    var f = panelShown ? 0.28 : 0.5;
-    var lookY = n.y - Math.tan((0.5 - f) * fov * Math.PI / 180) * d;
-    Graph.cameraPosition({ x: n.x, y: n.y, z: n.z + d }, { x: n.x, y: lookY, z: n.z }, 900);
+    var f = panelShown ? 0.30 : 0.5;
+    var D = Math.max(R * 1.25 / Math.tan(fov * Math.PI / 360), 60);
+    var shift = Math.tan((0.5 - f) * fov * Math.PI / 180) * D;
+    Graph.cameraPosition(
+      { x: n.x, y: n.y, z: n.z + D },
+      { x: n.x, y: n.y - shift, z: n.z },
+      700
+    );
   }
 
   var toastTimer = null;
