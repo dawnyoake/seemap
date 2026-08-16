@@ -510,8 +510,8 @@
         }
         highlightId = n.id;
         refreshAll();
-        focusNode(n);
         showInfo(n);
+        focusNode(n);
       };
       list.appendChild(row);
     });
@@ -623,7 +623,12 @@
   function focusNode(n) {
     if (n.x === undefined) return;
     var d = Math.max(40, Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) * 1.6);
-    Graph.cameraPosition({ x: n.x, y: n.y, z: n.z + d }, { x: n.x, y: n.y, z: n.z }, 900);
+    var fov = (Graph.camera && Graph.camera().fov) || 50;
+    // 面板打开时,目标节点放在屏幕上部(避开底部详情页遮挡)
+    var panelShown = document.getElementById('panel').style.display === 'block';
+    var f = panelShown ? 0.28 : 0.5;
+    var lookY = n.y - Math.tan((0.5 - f) * fov * Math.PI / 180) * d;
+    Graph.cameraPosition({ x: n.x, y: n.y, z: n.z + d }, { x: n.x, y: lookY, z: n.z }, 900);
   }
 
   var toastTimer = null;
