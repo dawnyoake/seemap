@@ -340,6 +340,8 @@
     Graph.nodeColor(nodeColor);
     Graph.linkColor(linkColor);
     Graph.nodeThreeObject(nodeObject);
+    // 强制全量重绘:确保访问器变化(高亮/筛选/头像)真正生效
+    if (Graph.refresh) Graph.refresh();
   }
 
   var Graph = ForceGraph3D()(document.getElementById('graph'))
