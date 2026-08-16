@@ -1,0 +1,8 @@
+{
+  "modelVersion": "6.1.1",
+  "description": "KeyGraph - entity relation 3D graph",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}

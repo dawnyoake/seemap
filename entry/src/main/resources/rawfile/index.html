@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KeyGraph</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0d0d17;
+    font-family: "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  #graph { position: absolute; inset: 0; }
+  #searchbar {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: min(88vw, 420px); height: 40px; border-radius: 20px;
+    background: rgba(20, 20, 40, 0.85); border: 1px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; padding: 0 14px; z-index: 10;
+    backdrop-filter: blur(6px);
+  }
+  #searchbar input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #fff; font-size: 15px;
+  }
+  #searchbar .icon { color: #88ffffff; font-size: 15px; margin-right: 8px; }
+  #stats {
+    position: absolute; top: 12px; right: 12px; z-index: 10;
+    color: rgba(255,255,255,0.55); font-size: 11px; text-align: right;
+    background: rgba(20,20,40,0.6); padding: 6px 10px; border-radius: 10px;
+    pointer-events: none;
+  }
+  #legend {
+    position: absolute; left: 12px; bottom: 14px; z-index: 10;
+    color: rgba(255,255,255,0.8); font-size: 12px; line-height: 1.9;
+    background: rgba(20,20,40,0.6); padding: 8px 12px; border-radius: 10px;
+    pointer-events: none;
+  }
+  #legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  #panel {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
+    max-height: 46vh; background: rgba(18, 18, 38, 0.94); border-top: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px 18px 0 0; padding: 16px 18px 20px; display: none;
+    backdrop-filter: blur(8px); overflow-y: auto;
+  }
+  #panel .grab { width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.25); margin: 0 auto 12px; }
+  #panel .close { position: absolute; top: 10px; right: 16px; color: rgba(255,255,255,0.6); font-size: 20px; cursor: pointer; padding: 4px; }
+  #panel h2 { color: #fff; font-size: 19px; margin-bottom: 2px; }
+  #panel #pHead { display: flex; align-items: center; gap: 12px; margin-bottom: 2px; }
+  #panel #pHead h2 { margin-bottom: 0; }
+  #panel #pImg { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); }
+  #panel .badge { display: inline-block; font-size: 11px; padding: 2px 10px; border-radius: 10px; color: #fff; margin-bottom: 8px; }
+  #panel .meta { color: rgba(255,255,255,0.65); font-size: 13px; margin-bottom: 10px; }
+  #panel .rel { border-top: 1px solid rgba(255,255,255,0.08); padding: 7px 0; display: flex; align-items: center; }
+  #panel .rel .rname { flex: 1; color: #fff; font-size: 14px; }
+  #panel .rel .rrel { color: rgba(255,255,255,0.5); font-size: 12px; margin-right: 10px; }
+  #toast {
+    position: absolute; top: 64px; left: 50%; transform: translateX(-50%); z-index: 30;
+    background: rgba(0,0,0,0.75); color: #fff; font-size: 13px;
+    padding: 8px 16px; border-radius: 16px; display: none; white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+
+<div id="searchbar">
+  <span class="icon">⌕</span>
+  <input id="q" type="search" placeholder="搜索角色 / 声优 / 作品" autocomplete="off">
+</div>
+<div id="stats"></div>
+<div id="legend">
+  <div><span class="dot" style="background:#a78bfa"></span>作品</div>
+  <div><span class="dot" style="background:#60a5fa"></span>角色</div>
+  <div><span class="dot" style="background:#fbbf24"></span>声优</div>
+</div>
+
+<div id="panel">
+  <div class="grab"></div>
+  <div class="close" onclick="closePanel()">×</div>
+  <div id="pHead">
+    <img id="pImg" alt="">
+    <h2 id="pName"></h2>
+  </div>
+  <div><span class="badge" id="pBadge"></span></div>
+  <div class="meta" id="pMeta"></div>
+  <div id="pRels"></div>
+</div>
+<div id="toast"></div>
+
+<script src="three.min.js"></script>
+<script src="3d-force-graph.min.js"></script>
+<script src="data.js"></script>
+<script>
+  var data = window.KEY_GRAPH || { nodes: [], links: [] };
+  var highlightId = null;
+  var hoverNodeId = null;
+
+  // ---- 圆形缩略图纹理(懒加载) ----
+  var typeColors = { work: '#a78bfa', character: '#60a5fa', va: '#fbbf24' };
+  var texCache = {};   // nodeId -> CanvasTexture
+  var loadingSet = {}; // nodeId -> true (加载中,避免重复请求)
+
+  function makeCircleTexture(img, ringColor) {
+    var size = 160;
+    var cv = document.createElement('canvas');
+    cv.width = size; cv.height = size;
+    var ctx = cv.getContext('2d');
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    // 铺满裁剪圆形
+    var s = Math.max(img.width, img.height) / (size - 4);
+    var dw = img.width / s, dh = img.height / s;
+    ctx.drawImage(img, (size - dw) / 2, (size - dh) / 2, dw, dh);
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2 - 3, 0, Math.PI * 2);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = ringColor || '#ffffff';
+    ctx.stroke();
+    return new THREE.CanvasTexture(cv);
+  }
+
+  function makeLetterTexture(name, color) {
+    var size = 160;
+    var cv = document.createElement('canvas');
+    cv.width = size; cv.height = size;
+    var ctx = cv.getContext('2d');
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 72px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name.charAt(0), size / 2, size / 2 + 4);
+    return new THREE.CanvasTexture(cv);
+  }
+
+  function nodeTexture(n) {
+    if (texCache[n.id]) return texCache[n.id];
+    // 生成/缓存一个"字母头像"作为兜底(有图时会在加载完成后替换)
+    if (!texCache[n.id]) {
+      texCache[n.id] = makeLetterTexture(n.name, typeColors[n.type] || '#888888');
+    }
+    if (n.img && !loadingSet[n.id]) {
+      loadingSet[n.id] = true;
+      var im = new Image();
+      im.onload = function () {
+        texCache[n.id] = makeCircleTexture(im, typeColors[n.type] || '#ffffff');
+        refreshNodes();
+      };
+      im.onerror = function () { };
+      im.src = n.img;
+    }
+    return texCache[n.id];
+  }
+
+  var spriteCache = {};
+  function nodeSprite(n) {
+    if (!spriteCache[n.id]) {
+      var mat = new THREE.SpriteMaterial({ map: nodeTexture(n), transparent: true });
+      var sp = new THREE.Sprite(mat);
+      var s = n.type === 'work' ? 26 : 18;
+      sp.scale.set(s, s, 1);
+      spriteCache[n.id] = sp;
+    }
+    return spriteCache[n.id];
+  }
+
+  function nodeObject(n) {
+    if (n.id === hoverNodeId || n.id === highlightId) {
+      return nodeSprite(n);
+    }
+    var geo = new THREE.SphereGeometry(n.type === 'work' ? 7 : 5, 24, 24);
+    var mat = new THREE.MeshPhongMaterial({ color: typeColors[n.type] || '#888888' });
+    return new THREE.Mesh(geo, mat);
+  }
+
+  function refreshNodes() {
+    Graph.nodeThreeObject(nodeObject);
+  }
+
+  var Graph = ForceGraph3D()(document.getElementById('graph'))
+    .graphData(data)
+    .backgroundColor('#0d0d17')
+    .nodeLabel(function (n) {
+      return n.type === 'character' ? n.name + '（' + n.work + '）' : n.name;
+    })
+    .nodeColor(function (n) {
+      if (n.id === highlightId) return '#ff4d4f';
+      return typeColors[n.type] || '#888888';
+    })
+    .nodeVal(function (n) { return n.type === 'work' ? 7 : 5; })
+    .nodeThreeObject(nodeObject)
+    .linkColor(function (l) { return l.rel === '配音' ? '#fbbf24' : '#60a5fa'; })
+    .linkOpacity(0.35)
+    .linkWidth(0.7)
+    .onNodeHover(function (n) {
+      hoverNodeId = n ? n.id : null;
+      refreshNodes();
+    })
+    .onNodeClick(function (n) { showInfo(n); });
+
+  document.getElementById('stats').innerHTML =
+    '节点 ' + data.nodes.length + ' · 关系 ' + data.links.length;
+  Graph.zoomToFit(600, 80);
+
+  function showInfo(n) {
+    var panel = document.getElementById('panel');
+    document.getElementById('pName').textContent = n.name;
+    var pImg = document.getElementById('pImg');
+    if (n.img) {
+      pImg.src = n.img;
+      pImg.style.display = 'block';
+    } else {
+      pImg.style.display = 'none';
+    }
+    var badge = document.getElementById('pBadge');
+    var labels = { work: '作品', character: '角色', va: '声优' };
+    var colors = { work: '#a78bfa', character: '#60a5fa', va: '#fbbf24' };
+    badge.textContent = labels[n.type] || n.type;
+    badge.style.background = colors[n.type] || '#888';
+    var meta = '';
+    if (n.type === 'character') meta = '出自作品：' + n.work;
+    if (n.type === 'va') meta = '配音演员';
+    document.getElementById('pMeta').textContent = meta;
+
+    var rels = document.getElementById('pRels');
+    rels.innerHTML = '';
+    data.links.forEach(function (l) {
+      var s = typeof l.source === 'object' ? l.source : data.nodes.find(function (x) { return x.id === l.source; });
+      var t = typeof l.target === 'object' ? l.target : data.nodes.find(function (x) { return x.id === l.target; });
+      if (!s || !t) return;
+      var isSrc = s.id === n.id;
+      if (!isSrc && t.id !== n.id) return;
+      var other = isSrc ? t : s;
+      var row = document.createElement('div');
+      row.className = 'rel';
+      row.innerHTML = '<span class="rrel">' + l.rel + '</span><span class="rname">' + other.name + '</span>';
+      row.onclick = function () {
+        highlightId = other.id;
+        Graph.nodeColor();
+        focusNode(other);
+        showInfo(other);
+      };
+      rels.appendChild(row);
+    });
+    panel.style.display = 'block';
+  }
+
+  function closePanel() { document.getElementById('panel').style.display = 'none'; }
+  document.addEventListener('click', function (e) {
+    if (e.target.id === 'graph') closePanel();
+  });
+
+  function focusNode(n) {
+    if (n.x === undefined) return;
+    var d = Math.max(40, Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) * 1.6);
+    Graph.cameraPosition({ x: n.x, y: n.y, z: n.z + d }, { x: n.x, y: n.y, z: n.z }, 900);
+  }
+
+  var qInput = document.getElementById('q');
+  var toastTimer = null;
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.style.display = 'none'; }, 1600);
+  }
+  qInput.addEventListener('input', function () {
+    var v = qInput.value.trim();
+    if (!v) { highlightId = null; Graph.nodeColor(); return; }
+    var vl = v.toLowerCase();
+    var hit = data.nodes.find(function (n) {
+      var text = n.name + (n.aliases ? ' ' + n.aliases.join(' ') : '');
+      return text.toLowerCase().indexOf(vl) >= 0;
+    });
+    if (!hit) { toast('未找到：' + v); highlightId = null; Graph.nodeColor(); return; }
+    highlightId = hit.id;
+    Graph.nodeColor();
+    focusNode(hit);
+  });
+</script>
+</body>
+</html>

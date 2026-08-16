@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "SeeMap module"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "SeeMap"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "SeeMap"
+    }
+  ]
+}
