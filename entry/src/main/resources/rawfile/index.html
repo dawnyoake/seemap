@@ -174,8 +174,7 @@
   var typeLabels = { work: '作品', character: '角色', va: '声优' };
   var groupTitles = { 所属: '所属作品', 配音: '配音演员' };
 
-  // ---- 圆形缩略图纹理(懒加载) ----
-  var texCache = {};
+  // ---- 圆形缩略图(懒加载) ----
   var loadingSet = {};
 
   function roundRect(ctx, x, y, w, h, r) {
@@ -188,7 +187,7 @@
     ctx.closePath();
   }
 
-  function makeCircleTexture(img, ringColor) {
+  function makeCircleCanvas(img, ringColor) {
     var size = 160;
     var cv = document.createElement('canvas');
     cv.width = size; cv.height = size;
@@ -205,10 +204,10 @@
     ctx.lineWidth = 5;
     ctx.strokeStyle = ringColor || '#ffffff';
     ctx.stroke();
-    return new THREE.CanvasTexture(cv);
+    return cv;
   }
 
-  function makeLetterTexture(name, color) {
+  function makeLetterCanvas(name, color) {
     var size = 160;
     var cv = document.createElement('canvas');
     cv.width = size; cv.height = size;
@@ -223,45 +222,45 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(name.charAt(0), size / 2, size / 2 + 4);
-    return new THREE.CanvasTexture(cv);
+    return cv;
   }
 
-  function nodeTexture(n) {
-    if (texCache[n.id]) return texCache[n.id];
-    texCache[n.id] = makeLetterTexture(n.name, typeColors[n.type] || '#888888');
+  // 只缓存 Canvas(图像数据源),不缓存 THREE 纹理/精灵 ——
+  // 因为库在 refresh() 全量重建时会 dispose 掉旧纹理,复用会变黑色方块
+  var canvasCache = {};
+  function nodeCanvas(n) {
+    if (!canvasCache[n.id]) {
+      canvasCache[n.id] = makeLetterCanvas(n.name, typeColors[n.type] || '#888888');
+    }
     if (n.img && !loadingSet[n.id]) {
       loadingSet[n.id] = true;
       var im = new Image();
       im.onload = function () {
-        texCache[n.id] = makeCircleTexture(im, typeColors[n.type] || '#ffffff');
-        // 图片到位后,让旧的占位精灵失效,重新生成带真实头像的精灵
-        spriteCache[n.id] = undefined;
-        spriteCache[n.id + '|hi'] = undefined;
+        canvasCache[n.id] = makeCircleCanvas(im, typeColors[n.type] || '#ffffff');
         refreshAll();
       };
       im.onerror = function () { };
       im.src = n.img;
     }
-    return texCache[n.id];
+    return canvasCache[n.id];
   }
 
-  var spriteCache = {};
   function nodeSprite(n, big) {
-    var key = n.id + (big ? '|hi' : '');
-    if (!spriteCache[key]) {
-      var mat = new THREE.SpriteMaterial({ map: nodeTexture(n), transparent: true });
-      var sp = new THREE.Sprite(mat);
-      var s = big ? (n.type === 'work' ? 36 : 26) : (n.type === 'work' ? 26 : 18);
-      sp.scale.set(s, s, 1);
-      spriteCache[key] = sp;
-    }
-    return spriteCache[key];
+    var mat = new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(nodeCanvas(n)),
+      transparent: true
+    });
+    var sp = new THREE.Sprite(mat);
+    var s = big ? (n.type === 'work' ? 36 : 26) : (n.type === 'work' ? 26 : 18);
+    sp.scale.set(s, s, 1);
+    return sp;
   }
 
   // ---- 常显名称标签 ----
-  var labelCache = {};
+  // 常显名称标签:同样只缓存 canvas,纹理每次新建(避免 refresh 后黑块)
+  var labelCanvasCache = {};
   function labelSprite(n) {
-    if (!labelCache[n.id]) {
+    if (!labelCanvasCache[n.id]) {
       var cv = document.createElement('canvas');
       cv.width = 256; cv.height = 56;
       var ctx = cv.getContext('2d');
@@ -277,10 +276,10 @@
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(name, 128, 30);
-      labelCache[n.id] = new THREE.CanvasTexture(cv);
+      labelCanvasCache[n.id] = cv;
     }
     var sp = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: labelCache[n.id], transparent: true, depthWrite: false
+      map: new THREE.CanvasTexture(labelCanvasCache[n.id]), transparent: true, depthWrite: false
     }));
     var sc = n.type === 'work' ? 60 : 44;
     sp.scale.set(sc, sc * (56 / 256), 1);
