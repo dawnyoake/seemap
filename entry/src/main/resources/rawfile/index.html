@@ -13,7 +13,7 @@
     position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
     width: min(88vw, 420px); height: 40px; border-radius: 20px;
     background: rgba(20, 20, 40, 0.85); border: 1px solid rgba(255,255,255,0.15);
-    display: flex; align-items: center; padding: 0 14px; z-index: 11;
+    display: flex; align-items: center; padding: 0 14px; z-index: 10;
     backdrop-filter: blur(6px);
   }
   #searchbar input {
@@ -38,50 +38,6 @@
     transition: opacity 0.8s ease;
   }
   #touchHint.hide { opacity: 0; }
-
-  #controlBar {
-    position: absolute; top: 58px; left: 50%; transform: translateX(-50%); z-index: 11;
-    width: min(94vw, 470px); display: flex; gap: 6px; overflow-x: auto;
-    padding: 2px; -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  #controlBar::-webkit-scrollbar { display: none; }
-  .chip {
-    flex: 0 0 auto; border: none; background: rgba(255,255,255,0.08);
-    color: #bbb; font-size: 12px; padding: 4px 11px; border-radius: 12px;
-    white-space: nowrap; cursor: pointer;
-  }
-  .chip.active { background: #4a6cf7; color: #fff; }
-
-  #searchResults {
-    position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 12;
-    width: min(88vw, 420px); max-height: 300px; overflow-y: auto; display: none;
-    background: rgba(18,18,38,0.96); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 14px; backdrop-filter: blur(8px);
-  }
-  .sr-row {
-    display: flex; align-items: center; gap: 8px; padding: 9px 14px;
-    color: #fff; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);
-    cursor: pointer;
-  }
-  .sr-row:last-child { border-bottom: none; }
-  .sr-name { flex: 1; }
-  .sr-work { color: rgba(255,255,255,0.45); font-size: 11px; }
-  .sr-badge { font-size: 10px; padding: 2px 8px; border-radius: 9px; color: #fff; }
-  .sr-empty { color: rgba(255,255,255,0.6); font-size: 13px; padding: 12px 14px; }
-
-  #hlBar {
-    position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); z-index: 12;
-    display: none; align-items: center; gap: 10px;
-    background: rgba(20,20,40,0.92); border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 20px; padding: 6px 14px; backdrop-filter: blur(6px); white-space: nowrap;
-  }
-  #hlBar #hlTitle { color: rgba(255,255,255,0.85); font-size: 12px; }
-  #hlBar #hlExit {
-    background: rgba(255,255,255,0.12); color: #fff; border: none; border-radius: 14px;
-    padding: 5px 14px; font-size: 12px; cursor: pointer;
-  }
-
   #legend {
     position: absolute; left: 12px; bottom: 14px; z-index: 10;
     color: rgba(255,255,255,0.8); font-size: 12px; line-height: 1.9;
@@ -89,7 +45,6 @@
     pointer-events: none;
   }
   #legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
-
   #panel {
     position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
     max-height: 46vh; background: rgba(18, 18, 38, 0.94); border-top: 1px solid rgba(255,255,255,0.12);
@@ -98,20 +53,15 @@
   }
   #panel .grab { width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.25); margin: 0 auto 12px; }
   #panel .close { position: absolute; top: 10px; right: 16px; color: rgba(255,255,255,0.6); font-size: 20px; cursor: pointer; padding: 4px; }
+  #panel h2 { color: #fff; font-size: 19px; margin-bottom: 2px; }
   #panel #pHead { display: flex; align-items: center; gap: 12px; margin-bottom: 2px; }
-  #panel #pHead h2 { margin-bottom: 0; color: #fff; font-size: 19px; }
+  #panel #pHead h2 { margin-bottom: 0; }
   #panel #pImg { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); }
-  #panel #pCopy {
-    border: none; background: rgba(255,255,255,0.1); color: #fff;
-    border-radius: 12px; padding: 4px 10px; font-size: 12px; cursor: pointer; margin-left: auto;
-  }
   #panel .badge { display: inline-block; font-size: 11px; padding: 2px 10px; border-radius: 10px; color: #fff; margin-bottom: 8px; }
   #panel .meta { color: rgba(255,255,255,0.65); font-size: 13px; margin-bottom: 10px; }
-  #panel .rg-title { color: rgba(255,255,255,0.45); font-size: 11px; margin: 10px 0 2px; }
-  #panel .rel { border-top: 1px solid rgba(255,255,255,0.06); padding: 7px 0; display: flex; align-items: center; }
+  #panel .rel { border-top: 1px solid rgba(255,255,255,0.08); padding: 7px 0; display: flex; align-items: center; }
   #panel .rel .rname { flex: 1; color: #fff; font-size: 14px; }
   #panel .rel .rrel { color: rgba(255,255,255,0.5); font-size: 12px; margin-right: 10px; }
-
   #toast {
     position: absolute; top: 64px; left: 50%; transform: translateX(-50%); z-index: 30;
     background: rgba(0,0,0,0.75); color: #fff; font-size: 13px;
@@ -126,14 +76,8 @@
   <span class="icon">⌕</span>
   <input id="q" type="search" placeholder="搜索角色 / 声优 / 作品" autocomplete="off">
 </div>
-<div id="controlBar"></div>
-<div id="searchResults"></div>
 <div id="stats"></div>
-<div id="touchHint">单指拖动旋转 · 双指捏合缩放 · 点按节点看详情 · 长按节点高亮关系</div>
-<div id="hlBar">
-  <span id="hlTitle"></span>
-  <button id="hlExit" onclick="exitHighlight()">退出高亮</button>
-</div>
+<div id="touchHint">单指拖动旋转 · 双指捏合缩放 · 点按节点看详情</div>
 <div id="legend">
   <div><span class="dot" style="background:#a78bfa"></span>作品</div>
   <div><span class="dot" style="background:#60a5fa"></span>角色</div>
@@ -146,7 +90,6 @@
   <div id="pHead">
     <img id="pImg" alt="">
     <h2 id="pName"></h2>
-    <button id="pCopy" onclick="copyName()">复制</button>
   </div>
   <div><span class="badge" id="pBadge"></span></div>
   <div class="meta" id="pMeta"></div>
@@ -158,35 +101,16 @@
 <script src="3d-force-graph.min.js"></script>
 <script src="data.js"></script>
 <script>
-  var fullNodes = window.KEY_GRAPH.nodes || [];
-  var fullLinks = window.KEY_GRAPH.links || [];
+  var data = window.KEY_GRAPH || { nodes: [], links: [] };
   var highlightId = null;
   var hoverNodeId = null;
-  var showLabels = false;
-  var workFilter = 'all';
-  var typeFilter = { work: true, character: true, va: true };
-  var longPressNodeId = null;
-  var lastLongPress = { id: null, time: 0 };
-  var pressTimer = null;
-  var currentInfoNode = null;
 
   var typeColors = { work: '#a78bfa', character: '#60a5fa', va: '#fbbf24' };
-  var typeLabels = { work: '作品', character: '角色', va: '声优' };
-  var groupTitles = { 所属: '所属作品', 配音: '配音演员' };
-
-  // ---- 圆形缩略图(懒加载) ----
   var loadingSet = {};
+  var canvasCache = {};
 
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-  }
-
+  // ---- 圆形头像:只缓存 canvas(图像数据源),纹理每次新建 ----
+  // (库的 refresh() 会 dispose 旧纹理,复用缓存的纹理实例会渲染成黑块)
   function makeCircleCanvas(img, ringColor) {
     var size = 160;
     var cv = document.createElement('canvas');
@@ -225,9 +149,6 @@
     return cv;
   }
 
-  // 只缓存 Canvas(图像数据源),不缓存 THREE 纹理/精灵 ——
-  // 因为库在 refresh() 全量重建时会 dispose 掉旧纹理,复用会变黑色方块
-  var canvasCache = {};
   function nodeCanvas(n) {
     if (!canvasCache[n.id]) {
       canvasCache[n.id] = makeLetterCanvas(n.name, typeColors[n.type] || '#888888');
@@ -256,56 +177,15 @@
     return sp;
   }
 
-  // ---- 常显名称标签 ----
-  // 常显名称标签:同样只缓存 canvas,纹理每次新建(避免 refresh 后黑块)
-  var labelCanvasCache = {};
-  function labelSprite(n) {
-    if (!labelCanvasCache[n.id]) {
-      var cv = document.createElement('canvas');
-      cv.width = 256; cv.height = 56;
-      var ctx = cv.getContext('2d');
-      var name = n.name.length > 14 ? n.name.slice(0, 14) + '…' : n.name;
-      ctx.font = 'bold 30px sans-serif';
-      var w = ctx.measureText(name).width;
-      var bw = Math.min(236, w + 32);
-      var bx = (256 - bw) / 2;
-      ctx.fillStyle = 'rgba(10,10,25,0.55)';
-      roundRect(ctx, bx, 4, bw, 48, 12);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(name, 128, 30);
-      labelCanvasCache[n.id] = cv;
-    }
-    var sp = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: new THREE.CanvasTexture(labelCanvasCache[n.id]), transparent: true, depthWrite: false
-    }));
-    var sc = n.type === 'work' ? 60 : 44;
-    sp.scale.set(sc, sc * (56 / 256), 1);
-    return sp;
-  }
-
   function nodeObject(n) {
-    if (longPressNodeId && !isLinked(n.id, longPressNodeId)) {
-      var dgeo = new THREE.SphereGeometry(2, 16, 16);
-      var dmat = new THREE.MeshPhongMaterial({ color: '#26263a' });
-      return new THREE.Mesh(dgeo, dmat);
-    }
     if (n.id === highlightId) return nodeSprite(n, true);
     if (n.id === hoverNodeId) return nodeSprite(n, false);
-    if (showLabels) return labelSprite(n);
     var geo = new THREE.SphereGeometry(n.type === 'work' ? 7 : 5, 24, 24);
     var mat = new THREE.MeshPhongMaterial({ color: typeColors[n.type] || '#888888' });
     return new THREE.Mesh(geo, mat);
   }
 
   function nodeColor(n) {
-    if (longPressNodeId) {
-      if (n.id === longPressNodeId) return '#ff4d4f';
-      if (isLinked(n.id, longPressNodeId)) return typeColors[n.type] || '#888888';
-      return '#22223a';
-    }
     if (n.id === highlightId) return '#ff4d4f';
     return typeColors[n.type] || '#888888';
   }
@@ -317,34 +197,20 @@
     };
   }
 
-  function isLinked(a, b) {
-    if (a === b) return true;
-    return fullLinks.some(function (l) {
-      var e = linkEnds(l);
-      return (e.s === a && e.t === b) || (e.s === b && e.t === a);
-    });
-  }
-
   function linkColor(l) {
-    var e = linkEnds(l);
-    var normal = l.rel === '配音' ? '#fbbf24' : '#60a5fa';
-    if (longPressNodeId) {
-      if (e.s === longPressNodeId || e.t === longPressNodeId) return normal;
-      return '#1a1a30';
-    }
-    return normal;
+    return l.rel === '配音' ? '#fbbf24' : '#60a5fa';
   }
 
+  // 强制重绘:setter + 全量 refresh(确保高亮/头像变化真正生效)
   function refreshAll() {
     Graph.nodeColor(nodeColor);
     Graph.linkColor(linkColor);
     Graph.nodeThreeObject(nodeObject);
-    // 强制全量重绘:确保访问器变化(高亮/筛选/头像)真正生效
     if (Graph.refresh) Graph.refresh();
   }
 
   var Graph = ForceGraph3D()(document.getElementById('graph'))
-    .graphData({ nodes: fullNodes, links: fullLinks })
+    .graphData(data)
     .backgroundColor('#0d0d17')
     .nodeLabel(function (n) {
       return n.type === 'character' ? n.name + '（' + n.work + '）' : n.name;
@@ -358,178 +224,28 @@
     .onNodeHover(function (n) {
       hoverNodeId = n ? n.id : null;
       refreshAll();
-      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-      if (n && !longPressNodeId) {
-        pressTimer = setTimeout(function () {
-          if (hoverNodeId === n.id) {
-            enterHighlight(n.id);
-            lastLongPress = { id: n.id, time: Date.now() };
-          }
-        }, 550);
-      }
     })
     .onNodeClick(function (n) {
-      if (lastLongPress.id === n.id && Date.now() - lastLongPress.time < 600) {
-        lastLongPress = { id: null, time: 0 };
-        return;
-      }
       highlightId = n.id;
       refreshAll();
       showInfo(n);
     });
 
   document.getElementById('stats').innerHTML =
-    '节点 ' + fullNodes.length + ' · 关系 ' + fullLinks.length;
-  Graph.zoomToFit(600, 80);
+    '节点 ' + data.nodes.length + ' · 关系 ' + data.links.length;
 
   // 触屏操作提示:4 秒后淡出
   setTimeout(function () {
     var h = document.getElementById('touchHint');
-    if (h) h.classList.add('hide');
+    if (h) { h.classList.add('hide'); }
   }, 4000);
   setTimeout(function () {
     var h = document.getElementById('touchHint');
-    if (h) h.style.display = 'none';
+    if (h) { h.style.display = 'none'; }
   }, 5000);
+  Graph.zoomToFit(600, 80);
 
-  // ---- 筛选 chips ----
-  var WORKS = ['CLANNAD', 'KANON', 'AIR', 'リトルバスターズ!'];
-
-  function buildChips() {
-    var bar = document.getElementById('controlBar');
-    bar.innerHTML = '';
-    function chip(label, active, onClick) {
-      var d = document.createElement('button');
-      d.className = 'chip' + (active ? ' active' : '');
-      d.textContent = label;
-      d.onclick = onClick;
-      bar.appendChild(d);
-    }
-    chip('全部', workFilter === 'all', function () { workFilter = 'all'; buildChips(); applyFilters(); });
-    WORKS.forEach(function (w) {
-      chip(w, workFilter === w, function () { workFilter = w; buildChips(); applyFilters(); });
-    });
-    chip('⟳ 复位', false, function () { Graph.zoomToFit(600, 60); });
-    chip('名称 ' + (showLabels ? '开' : '关'), showLabels, function () {
-      showLabels = !showLabels; buildChips(); refreshAll();
-    });
-    ['work', 'character', 'va'].forEach(function (t) {
-      chip(typeLabels[t], typeFilter[t], function () { typeFilter[t] = !typeFilter[t]; buildChips(); applyFilters(); });
-    });
-  }
-
-  function visibleGraph() {
-    var keep = {};
-    if (workFilter === 'all') {
-      fullNodes.forEach(function (n) { if (typeFilter[n.type]) keep[n.id] = true; });
-    } else {
-      fullNodes.forEach(function (n) {
-        if (n.type === 'work' && n.name === workFilter && typeFilter.work) keep[n.id] = true;
-        if (n.type === 'character' && n.work === workFilter && typeFilter.character) keep[n.id] = true;
-      });
-      if (typeFilter.va) {
-        fullLinks.forEach(function (l) {
-          var e = linkEnds(l);
-          if (l.rel !== '配音') return;
-          if (keep[e.s]) keep[e.t] = true;
-          if (keep[e.t]) keep[e.s] = true;
-        });
-      }
-    }
-    var nodes = fullNodes.filter(function (n) { return keep[n.id]; });
-    var links = fullLinks.filter(function (l) {
-      var e = linkEnds(l);
-      return keep[e.s] && keep[e.t];
-    });
-    return { nodes: nodes, links: links };
-  }
-
-  function applyFilters(opts) {
-    opts = opts || {};
-    var g = visibleGraph();
-    if (highlightId && !g.nodes.some(function (n) { return n.id === highlightId; })) highlightId = null;
-    if (longPressNodeId) exitHighlight();
-    Graph.graphData(g);
-    refreshAll();
-    var s = document.getElementById('stats');
-    s.innerHTML = (workFilter === 'all' ? '' : workFilter + ' · ') +
-      '节点 ' + g.nodes.length + ' · 关系 ' + g.links.length +
-      ' / 共 ' + fullNodes.length + ' · ' + fullLinks.length;
-    if (!opts.skipFit) Graph.zoomToFit(600, 60);
-  }
-
-  // ---- 长按高亮关系 ----
-  function enterHighlight(id) {
-    longPressNodeId = id;
-    var n = nodeById(id);
-    document.getElementById('hlTitle').textContent = '高亮:「' + (n ? n.name : id) + '」的关系';
-    document.getElementById('hlBar').style.display = 'flex';
-    refreshAll();
-  }
-
-  function exitHighlight() {
-    if (!longPressNodeId) return;
-    longPressNodeId = null;
-    document.getElementById('hlBar').style.display = 'none';
-    refreshAll();
-  }
-
-  // ---- 搜索(多结果下拉) ----
-  var searchTimer = null;
-  var qInput = document.getElementById('q');
-  qInput.addEventListener('input', function () {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(doSearch, 150);
-  });
-
-  function doSearch() {
-    var v = qInput.value.trim();
-    var list = document.getElementById('searchResults');
-    if (!v) {
-      list.style.display = 'none'; list.innerHTML = '';
-      highlightId = null; refreshAll();
-      return;
-    }
-    var vl = v.toLowerCase();
-    var hits = [];
-    fullNodes.forEach(function (n) {
-      if (hits.length >= 10) return;
-      var text = n.name + (n.aliases ? ' ' + n.aliases.join(' ') : '');
-      if (text.toLowerCase().indexOf(vl) >= 0) hits.push(n);
-    });
-    if (!hits.length) {
-      list.innerHTML = '<div class="sr-empty">未找到:「' + v + '」</div>';
-      list.style.display = 'block';
-      return;
-    }
-    list.innerHTML = '';
-    hits.forEach(function (n) {
-      var row = document.createElement('div');
-      row.className = 'sr-row';
-      row.innerHTML = '<span class="sr-name">' + n.name + '</span>' +
-        (n.type === 'character' ? '<span class="sr-work">' + n.work + '</span>' : '') +
-        '<span class="sr-badge" style="background:' + (typeColors[n.type] || '#888') + '">' + typeLabels[n.type] + '</span>';
-      row.onclick = function () {
-        list.style.display = 'none'; list.innerHTML = '';
-        if (workFilter !== 'all' || !typeFilter[n.type]) {
-          workFilter = 'all';
-          typeFilter = { work: true, character: true, va: true };
-          buildChips();
-          applyFilters();
-        }
-        highlightId = n.id;
-        refreshAll();
-        showInfo(n);
-        jumpTo(n);
-      };
-      list.appendChild(row);
-    });
-    list.style.display = 'block';
-  }
-
-  // ---- 详情面板 ----
   function showInfo(n) {
-    currentInfoNode = n;
     var panel = document.getElementById('panel');
     document.getElementById('pName').textContent = n.name;
     var pImg = document.getElementById('pImg');
@@ -540,105 +256,45 @@
       pImg.style.display = 'none';
     }
     var badge = document.getElementById('pBadge');
-    badge.textContent = typeLabels[n.type] || n.type;
-    badge.style.background = typeColors[n.type] || '#888';
+    var labels = { work: '作品', character: '角色', va: '声优' };
+    var colors = { work: '#a78bfa', character: '#60a5fa', va: '#fbbf24' };
+    badge.textContent = labels[n.type] || n.type;
+    badge.style.background = colors[n.type] || '#888';
     var meta = '';
     if (n.type === 'character') meta = '出自作品：' + n.work;
     if (n.type === 'va') meta = '配音演员';
     document.getElementById('pMeta').textContent = meta;
 
-    // 关系按类型分组
-    var groups = {};
-    fullLinks.forEach(function (l) {
-      var e = linkEnds(l);
-      var s = nodeById(e.s), t = nodeById(e.t);
-      if (!s || !t) return;
-      var isSrc = e.s === n.id;
-      if (!isSrc && e.t !== n.id) return;
-      var other = isSrc ? t : s;
-      (groups[l.rel] = groups[l.rel] || []).push(other);
-    });
     var rels = document.getElementById('pRels');
     rels.innerHTML = '';
-    Object.keys(groups).forEach(function (rel) {
-      var title = document.createElement('div');
-      title.className = 'rg-title';
-      title.textContent = groupTitles[rel] || rel;
-      rels.appendChild(title);
-      groups[rel].forEach(function (other) {
-        var row = document.createElement('div');
-        row.className = 'rel';
-        row.innerHTML = '<span class="rname">' + other.name + '</span>';
-        row.onclick = function () {
-          highlightId = other.id;
-          refreshAll();
-          showInfo(other);
-          jumpTo(other);
-        };
-        rels.appendChild(row);
-      });
+    data.links.forEach(function (l) {
+      var s = typeof l.source === 'object' ? l.source : data.nodes.find(function (x) { return x.id === l.source; });
+      var t = typeof l.target === 'object' ? l.target : data.nodes.find(function (x) { return x.id === l.target; });
+      if (!s || !t) return;
+      var isSrc = s.id === n.id;
+      if (!isSrc && t.id !== n.id) return;
+      var other = isSrc ? t : s;
+      var row = document.createElement('div');
+      row.className = 'rel';
+      row.innerHTML = '<span class="rrel">' + l.rel + '</span><span class="rname">' + other.name + '</span>';
+      row.onclick = function () {
+        highlightId = other.id;
+        refreshAll();
+        showInfo(other);
+        jumpTo(other);
+      };
+      rels.appendChild(row);
     });
     panel.style.display = 'block';
-    notifyPanel(true);
   }
 
-  function closePanel() {
-    document.getElementById('panel').style.display = 'none';
-    notifyPanel(false);
-  }
-
-  function notifyPanel(open) {
-    try {
-      if (window.seeMapNative && seeMapNative.onPanelChange) seeMapNative.onPanelChange(open);
-    } catch (e) { }
-  }
-
-  function copyName() {
-    if (!currentInfoNode) return;
-    var text = currentInfoNode.name;
-    var done = function () { toast('已复制：' + text); };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done).catch(function () { legacyCopy(text); done(); });
-    } else {
-      legacyCopy(text); done();
-    }
-  }
-
-  function legacyCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch (e) { }
-    document.body.removeChild(ta);
-  }
-
+  function closePanel() { document.getElementById('panel').style.display = 'none'; }
   document.addEventListener('click', function (e) {
-    var id = e.target.id;
-    if (id === 'graph') {
-      closePanel();
-      exitHighlight();
-    }
-    if (id !== 'q' && id !== 'searchResults' && e.target.closest && !e.target.closest('#searchResults')) {
-      document.getElementById('searchResults').style.display = 'none';
-    }
+    if (e.target.id === 'graph') closePanel();
   });
 
-  // ---- 工具 ----
-  function nodeById(id) {
-    return fullNodes.find(function (n) { return n.id === id; });
-  }
-
-  // ---- 跳转:目标节点放可视中心,邻居包围盒定距(关系平铺展开) ----
+  // ---- 运镜:跳转时目标放可视中心,邻居包围盒定距(关系平铺展开) ----
   function jumpTo(n) {
-    // 目标不在当前可见图里 → 先取消筛选(与搜索行为一致)
-    if (workFilter !== 'all' || !typeFilter[n.type]) {
-      workFilter = 'all';
-      typeFilter = { work: true, character: true, va: true };
-      buildChips();
-      applyFilters({ skipFit: true });
-    }
-    // 等节点有坐标后再聚焦(布局是异步的)
     var tries = 0;
     (function tryFocus() {
       if (n.x !== undefined || tries > 12) {
@@ -654,7 +310,7 @@
     if (n.x === undefined) { Graph.zoomToFit(600, 60); return; }
     // 收集目标 + 一度邻居
     var ids = {}; ids[n.id] = true;
-    fullLinks.forEach(function (l) {
+    data.links.forEach(function (l) {
       var e = linkEnds(l);
       if (e.s === n.id) ids[e.t] = true;
       if (e.t === n.id) ids[e.s] = true;
@@ -662,7 +318,7 @@
     // 包围盒半径
     var R = 10;
     var any = false;
-    fullNodes.forEach(function (m) {
+    data.nodes.forEach(function (m) {
       if (!ids[m.id] || m.x === undefined) return;
       any = true;
       var d2 = (m.x - n.x) * (m.x - n.x) + (m.y - n.y) * (m.y - n.y) + (m.z - n.z) * (m.z - n.z);
@@ -682,6 +338,7 @@
     );
   }
 
+  var qInput = document.getElementById('q');
   var toastTimer = null;
   function toast(msg) {
     var t = document.getElementById('toast');
@@ -690,8 +347,19 @@
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.style.display = 'none'; }, 1600);
   }
-
-  buildChips();
+  qInput.addEventListener('input', function () {
+    var v = qInput.value.trim();
+    if (!v) { highlightId = null; refreshAll(); return; }
+    var vl = v.toLowerCase();
+    var hit = data.nodes.find(function (n) {
+      var text = n.name + (n.aliases ? ' ' + n.aliases.join(' ') : '');
+      return text.toLowerCase().indexOf(vl) >= 0;
+    });
+    if (!hit) { toast('未找到：' + v); highlightId = null; refreshAll(); return; }
+    highlightId = hit.id;
+    refreshAll();
+    jumpTo(hit);
+  });
 </script>
 </body>
 </html>
